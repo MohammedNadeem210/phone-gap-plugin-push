@@ -23,9 +23,9 @@ import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompat.WearableExtender;
-import android.support.v4.app.RemoteInput;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationCompat.WearableExtender;
+import androidx.core.app.RemoteInput;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
@@ -47,6 +47,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.security.SecureRandom;
+import com.moengage.pushbase.push.MoEngageNotificationUtils;
+import com.moengage.push.PushManager;
 
 @SuppressLint("NewApi")
 public class FCMService extends FirebaseMessagingService implements PushConstants {
@@ -86,7 +88,10 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
     for (Map.Entry<String, String> entry : message.getData().entrySet()) {
       extras.putString(entry.getKey(), entry.getValue());
     }
-
+    
+    if (MoEngageNotificationUtils.isFromMoEngagePlatform(message.getData())) {
+      PushManager.getInstance().getPushHandler().handlePushPayload(getApplicationContext() ,message.getData());
+    } else {
     if (extras != null && isAvailableSender(from)) {
       Context applicationContext = getApplicationContext();
 
@@ -127,6 +132,7 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
         showNotificationIfPossible(applicationContext, extras);
       }
     }
+  }
   }
 
   /*
